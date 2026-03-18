@@ -12,7 +12,7 @@ function zeigeLoesungen() {
     const farbeKorrekt = "#c8e6c9";
     const farbeFalsch = "#ffcdd2";
 
-    // --- LINIEN (Canvas) ---
+    // Zuordnung (Canvas) 
     if (typeof window.anz_linke !== 'undefined' && typeof window.linienstarts !== 'undefined') {
         const zeilen = document.querySelectorAll('#fragetabelle tr');
         console.log("--- Richtige Lösungen ---");
@@ -21,23 +21,35 @@ function zeigeLoesungen() {
             if (!tr) continue;
             let linkeZelle = tr.querySelector('td');
             
-            let zugeordnet = -1;
+            let zugeordnet = null;
+            let rechtesElement = null;
+            
             for (let j = 0; j < window.anz_linien; j++) {
-                if (window.linienstarts[j] == i) { zugeordnet = window.linienende[j]; break; }
+                if (window.linienstarts[j] == i) { 
+                    zugeordnet = window.linienende[j];
+                    rechtesElement = document.getElementById("r" + zugeordnet);
+                    break; 
+                }
             }
             
-            let rechtesElement = zugeordnet !== -1 ? document.getElementById("r" + zugeordnet) : null;
             let istKorrekt = (rechtesElement && window.loesungen[i] && rechtesElement.textContent.trim() === window.loesungen[i].trim());
             
             if (linkeZelle) {
-                linkeZelle.style.backgroundColor = istKorrekt ? farbeKorrekt : farbeFalsch;
-                if (!istKorrekt && window.loesungen[i]) {
-                    linkeZelle.title = window.loesungen[i].trim();
-                    linkeZelle.style.cursor = "help";
-                } else {
+                if (istKorrekt) {
+                    linkeZelle.style.backgroundColor = farbeKorrekt;
                     linkeZelle.title = "";
                     linkeZelle.style.cursor = "default";
+                } else {
+                    linkeZelle.style.backgroundColor = farbeFalsch;
+                    if (window.loesungen[i]) {
+                        linkeZelle.title = window.loesungen[i].trim();
+                        linkeZelle.style.cursor = "help";
+                    } else {
+                        linkeZelle.title = "";
+                        linkeZelle.style.cursor = "default";
+                    }
                 }
+
                 if (window.loesungen[i]) {
                     console.log(linkeZelle.textContent.trim() + " --> " + window.loesungen[i].trim());
                 }
@@ -46,7 +58,7 @@ function zeigeLoesungen() {
         return;
     }
 
-    // --- SINGLE CHOICE (Radio) ---
+    // SINGLE CHOICE (Radio-Buttons) 
     if (typeof window.loesungsnr !== 'undefined') {
         const radios = document.querySelectorAll("input[type='radio']");
         console.log("--- Richtige Lösungen ---");
@@ -72,7 +84,7 @@ function zeigeLoesungen() {
         return;
     }
 
-    // --- MULTIPLE CHOICE (Checkboxes) ---
+    // MULTIPLE CHOICE (Checkboxes)
     if (typeof window.anz_alternativen !== 'undefined' && window.loesungen) {
         console.log("--- Richtige Lösungen ---");
         for (let i = 0; i < window.anz_alternativen; i++) {
@@ -100,7 +112,7 @@ function zeigeLoesungen() {
         return;
     }
 
-    // --- LÜCKENTEXT ---
+    // LÜCKENTEXT (Textfelder & Dropdowns)
     if (typeof window.anz_lueckentexte !== 'undefined' && window.loesungen) {
         function levDist(s, t) {
             if (!s.length) return t.length;
@@ -134,12 +146,13 @@ function zeigeLoesungen() {
                     }
                 }
                 
-                elem.style.backgroundColor = istKorrekt ? farbeKorrekt : farbeFalsch;
                 if (!istKorrekt) {
-                    elem.title = "Lösung: " + window.loesungen[i].replace(/\|/g, " ODER ");
+                    elem.title = window.loesungen[i].replace(/\|/g, " ODER ");
+                    elem.style.backgroundColor = farbeFalsch;
                     elem.style.cursor = "help";
                 } else {
                     elem.title = "";
+                    elem.style.backgroundColor = farbeKorrekt;
                     elem.style.cursor = "default";
                 }
             }
@@ -148,7 +161,7 @@ function zeigeLoesungen() {
         return;
     }
 
-    // --- DRAG & DROP ---
+    // DRAG & DROP (Paare zuordnen)
     if (typeof window.anz_paare !== 'undefined' && window.loesungen) {
         console.log("--- Richtige Lösungen ---");
         for (let i = 0; i < window.anz_paare; i++) {
@@ -156,20 +169,51 @@ function zeigeLoesungen() {
             if (box) {
                 let val = box.textContent.trim().replace(/\n|\r/g, "");
                 let istKorrekt = (val === window.loesungen[i].trim());
-                box.style.backgroundColor = istKorrekt ? farbeKorrekt : farbeFalsch;
                 
                 if (!istKorrekt) {
                     box.title = window.loesungen[i].trim();
+                    box.style.backgroundColor = farbeFalsch;
                     box.style.cursor = "help";
                 } else {
                     box.title = "";
+                    box.style.backgroundColor = farbeKorrekt;
                     box.style.cursor = "default";
                 }
                 
                 let linkeZelle = box.previousElementSibling;
-                let linkerText = linkeZelle ? linkeZelle.textContent.trim() : "Feld " + (i + 1);
+                let linkerText;
+                if(linkeZelle) {
+                    linkerText = linkeZelle.textContent.trim();
+                } else {
+                    linkerText = "Feld " + (i + 1);
+                }
                 console.log(linkerText + " --> " + window.loesungen[i].trim());
             }
+        }
+        return;
+    }
+
+    // DRAG & DROP (Sortierung einer Liste)
+    if (typeof window.anz_texte !== 'undefined' && window.loesungen) {
+        console.log("--- Richtige Lösungen ---");
+        for (let i = 0; i < window.anz_texte; i++) {
+            let elem = document.getElementById("s" + (i + 1));
+            if (elem) {
+                let val = elem.textContent.trim().replace(/\n|\r/g, "");
+                let korrekteLoesung = window.loesungen[i].trim();
+                let istKorrekt = (val === korrekteLoesung);   
+                           
+                if (!istKorrekt) {
+                    elem.title = "An diese Position gehört: " + korrekteLoesung;
+                    elem.style.backgroundColor = farbeFalsch; 
+                    elem.style.cursor = "help";
+                } else {
+                    elem.title = "";
+                    elem.style.backgroundColor = farbeKorrekt; 
+                    elem.style.cursor = "default";
+                }
+            }
+            console.log("Position " + (i + 1) + ": " + window.loesungen[i].trim());
         }
         return;
     }
