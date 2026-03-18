@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Kirchberg_solver",
+  "name": "Kirchbergnet Extended",
   "version": "1.0",
   "description": "Zeigt die Lösungen automatisch an",
   "content_scripts": [
