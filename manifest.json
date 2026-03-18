@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Kirchberg_solver",
+  "version": "1.0",
+  "description": "Zeigt die Lösungen automatisch an",
+  "content_scripts": [
+    {
+      "matches": ["*://*.kirchbergnet.de/*"],
+      "js": ["content.js"],
+      "world": "MAIN"
+    }
+  ]
+}
